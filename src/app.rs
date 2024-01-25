@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use crate::model::conversation;
+use crate::model::conversation::{self, Message};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -29,16 +29,29 @@ pub fn App() -> impl IntoView {
     }
 }
 
-/// Renders the home page of your application.
 #[component]
 fn HomePage() -> impl IntoView {
     let (conversation, set_conversation) = create_signal(conversation::Conversation::new());
-    
+
+    let send = create_action(move |new_message: &String| {
+        let user_message = Message {
+            user: true,
+            text: new_message.clone(),
+        };
+        
+        async move {
+            set_conversation.update(move |c| {
+                c.messages.push(user_message);
+            });
+        }
+    });
+
     view! {
-        <ChatArea/>
-        <TypeArea/>
+        <ChatArea conversation/>
+        <TypeArea send/>
     }
 }
+
 
 /// 404 - Not Found
 #[component]
